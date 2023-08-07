@@ -21,7 +21,7 @@ spec:
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = '772561320311'    // Replace with your AWS account ID
+        AWS_ACCOUNT_ID = '511620223753'    // Replace with your AWS account ID
     }
 
     options {
