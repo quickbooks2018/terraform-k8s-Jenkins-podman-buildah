@@ -33,7 +33,7 @@ spec:
     stages {
         stage('Build with Podman') {
             steps {
-                withCredentials([amazonWebServices(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
+                withCredentials([aws(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
                     container('python') {
                         sh '''
                             apt update -y && apt install -y podman awscli
