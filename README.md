@@ -8,7 +8,7 @@ helm repo ls
 helm search repo jenkins
 helm search repo jenkins/jenkins --versions
 helm show values jenkins/jenkins --version 4.4.0
-helm show values jenkins/jenkins --version 4.4.40 > jenkins-values.yaml
+helm show values jenkins/jenkins --version 4.4.0 > jenkins-values.yaml
 helm upgrade --install jenkins --namespace jenkins --create-namespace jenkins/jenkins --version 4.4.0 -f jenkins-values.yaml --wait
 
 
