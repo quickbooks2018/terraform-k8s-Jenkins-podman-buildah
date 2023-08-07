@@ -1,0 +1,49 @@
+pipeline {
+  agent {
+    kubernetes {
+      yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buildah
+spec:
+  containers:
+  - name: buildah
+    image: quay.io/buildah/stable:v1.23.1
+    command:
+    - cat
+    tty: true
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: varlibcontainers
+        mountPath: /var/lib/containers
+  volumes:
+    - name: varlibcontainers
+'''
+    }
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3'))
+    durabilityHint('PERFORMANCE_OPTIMIZED')
+    disableConcurrentBuilds()
+  }
+  stages {
+    stage('Build with Buildah') {
+      steps {
+      withCredentials([amazonWebServices(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
+        container('buildah') {
+          sh '''
+          cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+          echo "jenkins build Number is ${BUILD_NUMBER}"
+          apt update -y && apt install -y awscli
+          podman build -t 772561320311.dkr.ecr.us-east-1.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
+          podman images
+          aws ecr get-login-password --region ${}AWS_DEFAULT_REGION} | buildah login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+          '''
+         }
+       }
+      }
+    }
+  }
+}
