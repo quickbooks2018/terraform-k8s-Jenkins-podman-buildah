@@ -1,0 +1,50 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+    name: python
+spec:
+    containers:
+    - name: python
+        image: python
+        command:
+        - cat
+        tty: true
+        securityContext:
+            privileged: true
+'''
+        }
+    }
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '772561320311'    // Replace with your AWS account ID
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+        durabilityHint('PERFORMANCE_OPTIMIZED')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Build with Podman') {
+            steps {
+                withCredentials([amazonWebServices(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
+                    container('python') {
+                        sh '''
+                            apt update -y && apt install -y podman awscli
+                            cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+                            podman build -t asim:arain -f Dockerfile .
+                            podman images
+                            aws ecr get-login-password --region $AWS_DEFAULT_REGION | podman login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}
