@@ -36,8 +36,15 @@ spec:
                 withCredentials([aws(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
                     container('python') {
                         sh '''
-                            apt update -y && apt install -y podman awscli
-                            cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+                            apt update -y && apt install -y podman awscli git
+                            echo "The job name is ${JOB_NAME}"
+                            cd ${WORKSPACE}
+                            ls
+                            ls -lthr
+                            git clone https://github.com/quickbooks2018/terraform-k8s-Jenkins-podman-buildah.git
+                            cd terraform-k8s-Jenkins-podman-buildah
+                            ls
+                            cd build && cp ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
                             echo "jenkins build Number is ${BUILD_NUMBER}"
                             podman build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
                             podman images
