@@ -7,9 +7,9 @@ helm repo update
 helm repo ls
 helm search repo jenkins
 helm search repo jenkins/jenkins --versions
-helm show values jenkins/jenkins --version 4.4.0
-helm show values jenkins/jenkins --version 4.4.0 > jenkins-values.yaml
-helm upgrade --install jenkins --namespace jenkins --create-namespace jenkins/jenkins --version 4.4.0 -f jenkins-values.yaml --wait
+helm show values jenkins/jenkins --version 4.5.0
+helm show values jenkins/jenkins --version 4.5.0 > jenkins-values.yaml
+helm upgrade --install jenkins --namespace jenkins --create-namespace jenkins/jenkins --version 4.5.0 -f jenkins-values.yaml --wait
 
 
 # Set up port forwarding to the Jenkins UI from Cloud Shell
