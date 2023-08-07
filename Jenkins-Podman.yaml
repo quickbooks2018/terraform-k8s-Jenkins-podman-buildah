@@ -9,7 +9,7 @@ metadata:
 spec:
     containers:
     - name: python
-        image: python
+        image: python:slim
         command:
         - cat
         tty: true
