@@ -9,12 +9,12 @@ metadata:
 spec:
     containers:
     - name: python
-        image: python:slim
-        command:
-        - cat
-        tty: true
-        securityContext:
-            privileged: true
+      image: python:slim
+      command:
+      - cat
+      tty: true
+      securityContext:
+          privileged: true
 '''
         }
     }
@@ -37,9 +37,9 @@ spec:
                     container('python') {
                         sh '''
                             apt update -y && apt install -y podman awscli
-                            cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+                            cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
                             echo "jenkins build Number is ${BUILD_NUMBER}"
-                            podman build -t 772561320311.dkr.ecr.us-east-1.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
+                            podman build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
                             podman images
                             aws ecr get-login-password --region $AWS_DEFAULT_REGION | podman login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
                         '''
