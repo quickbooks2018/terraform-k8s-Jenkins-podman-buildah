@@ -49,6 +49,7 @@ spec:
                             podman build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
                             podman images
                             aws ecr get-login-password --region $AWS_DEFAULT_REGION | podman login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                            podman push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops:${BUILD_NUMBER}
                         '''
                     }
                 }
