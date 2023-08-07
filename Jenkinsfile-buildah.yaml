@@ -34,11 +34,11 @@ spec:
       withCredentials([amazonWebServices(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
         container('buildah') {
           sh '''
-          cd ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+          cd ${WORKSPACE}/terraform-k8s-Jenkins-buildah-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-buildah-buildah/docker/Dockerfile .
           echo "jenkins build Number is ${BUILD_NUMBER}"
           apt update -y && apt install -y awscli
-          podman build -t 772561320311.dkr.ecr.us-east-1.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
-          podman images
+          buildah build -t 772561320311.dkr.ecr.us-east-1.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
+          buildah images
           aws ecr get-login-password --region ${}AWS_DEFAULT_REGION} | buildah login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
           '''
          }
