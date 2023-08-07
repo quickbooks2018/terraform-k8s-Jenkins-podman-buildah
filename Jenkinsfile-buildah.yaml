@@ -1,49 +1,59 @@
+
 pipeline {
-  agent {
-    kubernetes {
-      yaml '''
+    agent {
+        kubernetes {
+            yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
-  name: buildah
+    name: python
 spec:
-  containers:
-  - name: buildah
-    image: quay.io/buildah/stable:v1.23.1
-    command:
-    - cat
-    tty: true
-    securityContext:
-      privileged: true
-    volumeMounts:
-      - name: varlibcontainers
-        mountPath: /var/lib/containers
-  volumes:
-    - name: varlibcontainers
+    containers:
+    - name: python
+      image: python:slim
+      command:
+      - cat
+      tty: true
+      securityContext:
+          privileged: true
 '''
+        }
     }
-  }
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '3'))
-    durabilityHint('PERFORMANCE_OPTIMIZED')
-    disableConcurrentBuilds()
-  }
-  stages {
-    stage('Build with Buildah') {
-      steps {
-      withCredentials([amazonWebServices(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
-        container('buildah') {
-          sh '''
-          cd ${WORKSPACE}/terraform-k8s-Jenkins-buildah-buildah/build && cp ${WORKSPACE}terraform-k8s-Jenkins-buildah-buildah/docker/Dockerfile .
-          echo "jenkins build Number is ${BUILD_NUMBER}"
-          apt update -y && apt install -y awscli
-          buildah build -t 772561320311.dkr.ecr.us-east-1.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
-          buildah images
-          aws ecr get-login-password --region ${}AWS_DEFAULT_REGION} | buildah login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-          '''
-         }
-       }
-      }
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '511620223753'    // Replace with your AWS account ID
     }
-  }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+        durabilityHint('PERFORMANCE_OPTIMIZED')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Build with Buildah') {
+            steps {
+                withCredentials([aws(credentialsId: 'AWS_CLI_CREDENTIALS')]) {
+                    container('python') {
+                        sh '''
+                            apt update -y && apt install -y buildah awscli git
+                            echo "The job name is ${JOB_NAME}"
+                            cd ${WORKSPACE}
+                            ls
+                            ls -lthr
+                            git clone https://github.com/quickbooks2018/terraform-k8s-Jenkins-podman-buildah.git
+                            cd terraform-k8s-Jenkins-podman-buildah
+                            ls
+                            cd build && cp ${WORKSPACE}/terraform-k8s-Jenkins-podman-buildah/docker/Dockerfile .
+                            echo "jenkins build Number is ${BUILD_NUMBER}"
+                            buildah build -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/devops:${BUILD_NUMBER} -f Dockerfile .
+                            buildah images
+                            aws ecr get-login-password --region $AWS_DEFAULT_REGION | buildah login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                        '''
+                    }
+                }
+            }
+        }
+    }
 }
