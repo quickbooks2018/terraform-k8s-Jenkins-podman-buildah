@@ -1,5 +1,10 @@
 # Terraform Jenkins Eks
 
+- podman official image
+```image
+quay.io/podman/stable:latest
+```
+
 - Jenkins Helm
 ```jenkins
 helm repo add jenkins https://charts.jenkins.io
